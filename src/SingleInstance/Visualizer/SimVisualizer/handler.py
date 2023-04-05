@@ -1,9 +1,9 @@
 from copy import copy
 
-from src.Simulator.Generator.Builder.main import BuildSimulator
+from src.SingleInstance.Simulator.Generator.Builder.main import BuildSimulator
 from src.Utils.DataParser.definition import DataParser
 from src.Utils.Handler.definition import AbstractHandler
-from src.Visualizer.SimVisualizer.definition import SimVisualizer
+from src.SingleInstance.Visualizer.SimVisualizer.definition import SimVisualizer
 
 
 class SimVisHandler(AbstractHandler):

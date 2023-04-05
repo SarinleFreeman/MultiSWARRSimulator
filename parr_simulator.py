@@ -21,12 +21,12 @@ for theta_int in theta_int_range:
     # Move the capacities and relevant files to a new directory
     move_cpc_files("simulation_data", "cpc_dir", files=['args', 'stm_corr_data_path', 'stm_reconstruct'])
 
-    # Remove simulation_data for storage purposes
-    for item in os.listdir("simulation_data"):
-        item_path = os.path.join("simulation_data", item)
-        if os.path.isfile(item_path):
+    # Remove simulation_data due to storage limitations
+    for data_file in os.listdir("simulation_data"):
+        data_file_path = os.path.join("simulation_data", data_file)
+        if os.path.isfile(data_file_path):
             os.remove(item_path)
-        elif os.path.isdir(item_path):
+        elif os.path.isdir(data_file_path):
             shutil.rmtree(item_path)
 
 end_time = time.time()

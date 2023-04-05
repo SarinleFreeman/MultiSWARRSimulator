@@ -1,11 +1,11 @@
 import os
 
 print(os.getcwd())
-from src.User.CLI.handler import CLIHandler
+from src.SingleInstance.User.CLI.handler import CLIHandler
 
-from src.Capacity.CapacityCalculations.PC.handler import PCCalcHandler
-from src.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
-from src.Runner.DynamicBasePath import DynamicBasePath
+from src.SingleInstance.Capacity.CapacityCalculations.PC.handler import PCCalcHandler
+from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
+from src.Paths.Constructors.DynamicPathConstructor import DynamicPathConstructor
 
 
 
@@ -60,8 +60,8 @@ bs_pth.take_path(init_req={'TYPE': 'CLI', 'ARGS': bs_p_b.args})
 """
 
 # set up dynamic path
-d_p_b = DynamicBasePath(default_args=defaults, number_of_signals=500,
-                        base_dir=os.path.join(os.getcwd(), '14file', '2023-03-20 14:03:29.387629-gain=2.1-film_thickness=1.081e-05'))
+d_p_b = DynamicPathConstructor(default_args=defaults, number_of_signals=500,
+                               base_dir=os.path.join(os.getcwd(), '14file', '2023-03-20 14:03:29.387629-gain=2.1-film_thickness=1.081e-05'))
 d_p_b.set_handlers(handlers=[
     CLIHandler(next_step='STM_CALC'),
     STMCalcHandler(next_step=None),

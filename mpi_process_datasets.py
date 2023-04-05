@@ -5,14 +5,14 @@ import os
 
 from mpi4py import MPI
 
-from src.User.CLI.handler import CLIHandler
-from src.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
-from src.Runner.DynamicBasePath import DynamicBasePath
+from src.SingleInstance.User.CLI.handler import CLIHandler
+from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
+from src.Paths.Constructors.DynamicPathConstructor import DynamicPathConstructor
 
 
 def process_dataset(default_args, base_dir):
-    d_p_b = DynamicBasePath(default_args=default_args, number_of_signals=500,
-                            base_dir=base_dir)
+    d_p_b = DynamicPathConstructor(default_args=default_args, number_of_signals=500,
+                                   base_dir=base_dir)
 
     d_p_b.set_handlers(handlers=[
         STMCalcHandler(next_step=None),

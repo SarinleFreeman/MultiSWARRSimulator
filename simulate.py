@@ -1,46 +1,32 @@
+# External imports
 import os
 import time
 import psutil
 import threading
 from mpi4py import MPI
 from numpy import split, asarray
-import argparse 
-from src.Capacity.CapacityCalculations.PC.handler import PCCalcHandler
-from src.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
-from src.Runner.ParamGenerator import ParamGenerator
-from src.Runner.Sim import SimPathRunner
-from src.Simulator.DirCreator.handler import SimDirCreator
-from src.Simulator.Generator.handler import SimGenHandler
-from src.Simulator.Launcher.handler import SimLauncherHandler
-from src.User.CLI.handler import CLIHandler
-from src.Visualizer.SimVisualizer.handler import SimVisHandler
+import argparse
+
+# Internal Imports
+from src.SingleInstance.Capacity.CapacityCalculations.PC.handler import PCCalcHandler
+from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
+from src.Parralelizer.ParamGenerator import ParamGenerator
+from src.Parralelizer.Simulation import SimPathRunner
+from src.SingleInstance.Simulator.DirCreator.handler import SimDirCreator
+from src.SingleInstance.Simulator.Generator.handler import SimGenHandler
+from src.SingleInstance.Simulator.Launcher.handler import SimLauncherHandler
+from src.SingleInstance.User.CLI.handler import CLIHandler
+from src.SingleInstance.Visualizer.SimVisualizer.handler import SimVisHandler
 
 
-def monitor_memory_usage(interval = 1.0) -> None:
-    """
-    Monitor the memory usage of the current process and print the maximum memory usage.
-
-    :param interval: Time interval (in seconds) between memory usage checks. Default is 1.0 seconds.
-    """
-    process = psutil.Process(os.getpid())
-    max_memory = 0
-
-    while True:
-        current_memory = process.memory_info().rss  # Get the current memory usage in bytes
-        max_memory = max(max_memory, current_memory)
-        print(f"Current memory usage: {current_memory / 1024 / 1024:.2f} MB")
-        print(f"Max memory usage: {max_memory / 1024 / 1024:.2f} MB")
-        time.sleep(interval)
-# set up communications
+# Set up communications
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 print(comm)
 print(size)
 print(rank)
-monitor_thread = threading.Thread(target=monitor_memory_usage)
-monitor_thread.daemon = True
-monitor_thread.start()
+
 
 # set up arguments
 if rank == 0:

@@ -1,6 +1,6 @@
 from copy import copy
 
-from src.User.Validator.definition import Validator
+from src.SingleInstance.User.Validator.definition import Validator
 from src.Utils.Handler.definition import AbstractHandler
 
 

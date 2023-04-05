@@ -1,8 +1,8 @@
 import os
 from copy import copy
 import json
-from src.Runner.BasePath import BasePathBuilder
-from src.Runner.DynamicBasePath import DynamicBasePath
+from src.Paths.Constructors.BasePathConstructor import BasePathConstructor
+from src.Paths.Constructors.DynamicPathConstructor import DynamicPathConstructor
 from src.Utils.prints import purprint, sprint
 
 
@@ -33,7 +33,7 @@ class SimPathRunner:
             sprint(f"{count+1}/{len(self.hp_space)}")
 
             # Build the base path.
-            bs_p_b = BasePathBuilder(default_args=copy(args))
+            bs_p_b = BasePathConstructor(default_args=copy(args))
             bs_p_b.set_handlers(handlers=bs_hlers)
             bs_p_b.set_num_steps(round(5 * 1e10 * args['theta_int']))
             bs_p_b.set_dirs(add_on=args['identifier'])
@@ -45,8 +45,8 @@ class SimPathRunner:
             bs_pth.take_path(init_req={'TYPE': init_req_type, 'ARGS': bs_p_b.args})
 
             #Build the dynamic path.
-            d_p_b = DynamicBasePath(default_args=copy(bs_p_b.args), number_of_signals=num_signals,
-                                    base_dir=bs_p_b.args['sim_dir'])
+            d_p_b = DynamicPathConstructor(default_args=copy(bs_p_b.args), number_of_signals=num_signals,
+                                           base_dir=bs_p_b.args['sim_dir'])
             d_p_b.set_handlers(handlers=dy_hlers)
             d_p_b.set_dirs()
             d_pth = d_p_b.build_path()

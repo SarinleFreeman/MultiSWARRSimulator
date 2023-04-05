@@ -9,6 +9,8 @@
 #SBATCH --output=output_test.log
 #SBATCH --exclusive
 
+# Install relevant packages
+
 module load python/3.9.15
 module load py-setuptools/57.4.0-py3.9.15
 module load py-matplotlib/3.4.3
@@ -23,11 +25,15 @@ pip install simple_chalk
 pip install joblib
 pip install psutil
 
+# Use new path
+
 export PYTHONPATH=/software/projects/pawsey0841/setonix/python/lib/python3.9.15/site-packages:$PYTHONPATH
 
+# Set environment variables
 export OMP_NUM_THREADS=1
 export MPICH_OFI_STARTUP_CONNECT=1
 export MPICH_OFI_VERBOSE=1
+
 
 start_time=$(date +%s)
 
@@ -35,22 +41,22 @@ start_time=$(date +%s)
 for theta_int in $(seq 1e-8 1e-9 10e-8); do
   echo "Running simulation with theta_int = $theta_int"
 
-  # Run the simulation
+  # Run the simulation and store data in simulation_data
   srun -N 20 -n 2560 -c 1 python simulate.py --theta_int $theta_int
 
-  # Generate capacities
+  # Generate capacities for each dataset.
   srun -N 20 -n 2560 -c 1 python mpi_process_datasets.py "simulation_data"
 
-  # Move the new data to the relevant directory
+  # Move the capcities and relevant files to a new directory
   srun -N 1 -n 1 -c 1 python mv_cpc.py simulation_data cpc_dir --file args 'stm_corr_data_path '  'stm_reconstruct'
 
-  # Delete simulation_data
+  # Remove simulation_data for storage purposes
   rm -rf simulation_data/*
 
 done
 
-end_time=$(date +%s)  # Record end time
 
-elapsed_time=$((end_time - start_time))  # Calculate elapsed time in seconds
+end_time=$(date +%s)
+elapsed_time=$((end_time - start_time))
 
-echo "Loop took ${elapsed_time} seconds to run."
+echo "The simulation took ${elapsed_time} seconds to run."

@@ -11,9 +11,9 @@ class CLI:
 
     def parse_user_inputs(self: 'CLI') -> None:
         parser = argparse.ArgumentParser(
-            prog='main',
+            prog='Single Instance',
             description=print(chalk.blue.bold(
-                'Welcome to the Spin Wave Simulator. The program has a corresponding manual located at '
+                'Welcome to the Spin Wave Single Argument Simulator. The program has a corresponding manual located at '
                 'X explaining how to utilize the system effectively.'
                 'I advise you to read said manual before use.\n '
             )),
