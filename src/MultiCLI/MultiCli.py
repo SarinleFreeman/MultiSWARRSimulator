@@ -1,13 +1,13 @@
 import argparse
 import os
 
-import chalk
+from simple_chalk import chalk
 import numpy as np
 
 
 class MultiCLI:
-    def __init__(self: 'MultiCLI', defaults: dict) -> None:
-        self.defaults = defaults
+    def __init__(self: 'MultiCLI', defs: dict) -> None:
+        self.defaults = defs
         self.args = None
 
     def parse_user_inputs(self: 'MultiCLI') -> None:
@@ -53,6 +53,7 @@ class MultiCLI:
             for k, v in self.defaults.items()
         }
 
+
 # test code
 defaults = {'time_power': -9,
             'time_base': 10,
@@ -60,7 +61,7 @@ defaults = {'time_power': -9,
             'number_of_points': 1024,
             'save_step': 1,
             'shift_save': 0,
-            'theta_int': 10e-9
+            'theta_int': 10e-9,
             'max_delay': 10,
             'custom_start': None,
             'input_antannae': 384,
