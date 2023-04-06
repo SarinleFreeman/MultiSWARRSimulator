@@ -23,7 +23,8 @@ class MultiCLI:
 
         # Add arguments for each parameter
         for key in self.defaults.keys():
-            parser.add_argument(f'--{key}', f'-{key[:2]}', help=chalk.blue(
+            key_shrt = "_".join([k[:2] for k in key.split('_')])
+            parser.add_argument(f'--{key}', f'-{key_shrt}', help=chalk.blue(
                 f"This parameter is used to specify the range and the number of points for the {key} variable in the "
                 "format min,max,num_points."),
                                 type=str,
@@ -41,7 +42,7 @@ class MultiCLI:
                     max_val = float(arg_range[1])
                     num_points = int(arg_range[2])
 
-                    setattr(args, f'{key}_values', np.linspace(min_val, max_val, num_points).tolist())
+                    setattr(args, key, {'min': min_val, 'max': max_val, 'num_points': num_points})
                 else:
                     raise ValueError(f"Invalid format for --{key}. It should be in the format min,max,num_points")
 
@@ -92,4 +93,4 @@ multi_cli = MultiCLI(defaults)
 multi_cli.parse_user_inputs()
 parsed_inputs = multi_cli.get_parsed_inputs()
 
-print(parsed_inputs['theta_int_values'])
+print(parsed_inputs['theta_int'])
