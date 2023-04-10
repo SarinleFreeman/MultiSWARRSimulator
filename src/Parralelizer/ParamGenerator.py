@@ -1,43 +1,74 @@
-import itertools
-from copy import copy
+from itertools import product as it_product
+from copy import deepcopy
+from typing import List
 
 import numpy as np
-from numpy import arange, linspace
+from numpy import linspace
+from traitlets import Any
 
 
 class ParamGenerator:
-    def __init__(self,defaults:dict):
+    """
+    This class generates a parameter space based on the provided default values and dimensions.
+    """
+
+    def __init__(self, defaults: dict):
         self.defaults = defaults
         self.dimensions = []
         self.space = []
 
-    def add_dimension(self, name: str, num_of_points: int, limits: tuple, rnd:int):
+    def add_dimensions(self, dimensions: List[List[Any]]) -> None:
+        """
+        This function adds multiple dimensions to our Parameter space.
+
+        :param dimensions: List of dimensions to add.
+        :return: None
+        """
+        for dim in dimensions:
+            self.add_dimension(*dim)
+
+    def add_dimension(self, name: str, min: float, max: float, num_of_points: int, rnd: int = 3) -> None:
         """
         This function adds a dimension to our Parameter space.
 
         :param name: Name of dimension.
+        :param min: Minimum value of dimension.
+        :param max: Maximum value of dimension.
         :param num_of_points: Number of points associated with dimension.
-        :param limits: Limits associated with dimension.
         :param rnd: Decimal place position we wish to round to.
         :return: None
         """
-        limits = np.round(limits,rnd)
+        # round limits and create array
+        limits = np.round((min, max), rnd)
+        nums = np.round(linspace(*limits, num_of_points), rnd)
 
-        nums = np.round(linspace(*limits,num_of_points), rnd)
-        dimension = list(itertools.product([name], nums))
+        # create dimension and append to list
+        dimension = list(it_product([name], nums))
         self.dimensions.append(dimension)
 
-    def create_space(self):
-        #join dimensions
-        dim_jnd = list(itertools.product(*self.dimensions))
-        for elem in dim_jnd:
-            df_copy = copy(self.defaults)
-            df_copy.update({var[0]: var[1] for var in elem})
+    def create_space(self) -> None:
+        """
+        This function creates the parameter space.
 
-            #develop identification system
-            identifier = ''
-            for arg in elem:
-                identifier += f'-{arg[0]}={arg[1]}'
+        :return: None
+        """
+        # create all combinations of dimensions
+        dim_jnd = list(it_product(*self.dimensions))
 
-            df_copy['identifier'] = identifier
-            self.space.append(df_copy)
+        # create parameter space
+        self.space = [
+            {**deepcopy(self.defaults), **{var[0]: var[1] for var in elem},
+             'identifier': ''.join(f'-{arg[0]}={arg[1]}' for arg in elem)}
+            for elem in dim_jnd
+        ]
+
+        # Append theta int to the identifier
+        for i, elem in enumerate(self.space):
+            elem['identifier'] += f'-theta_int={self.defaults["theta_int"]}'
+    def get_space(self) -> List[dict]:
+        """
+        This function returns the parameter space.
+
+        :return: Parameter space.
+        """
+        return self.space

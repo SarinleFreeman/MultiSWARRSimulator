@@ -2,10 +2,12 @@ import argparse
 import glob
 import json
 import os
+
+from mpi4py import MPI
+
 from src.SingleInstance.User.CLI.handler import CLIHandler
 from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
 from src.Paths.Constructors.DynamicPathConstructor import DynamicPathConstructor
-
 
 
 def process_dataset(default_args, base_dir):
@@ -13,7 +15,6 @@ def process_dataset(default_args, base_dir):
                                    base_dir=base_dir)
 
     d_p_b.set_handlers(handlers=[
-        CLIHandler(next_step='STM_CALC'),
         STMCalcHandler(next_step=None),
     ])
     d_p_b.set_dirs()
@@ -31,17 +32,25 @@ parser.add_argument('base_data_parent_dir', type=str, help='Path to the parent d
 args = parser.parse_args()
 
 # Main loop
-base_data_parent_dir = os.path.join(os.getcwd(),args.base_data_parent_dir)
-print(base_data_parent_dir)
-
+base_data_parent_dir = os.path.join(os.getcwd(), args.base_data_parent_dir)
 
 # Find all directories in the base_data_parent_dir
 all_dirs = [d for d in glob.glob(os.path.join(base_data_parent_dir, '*')) if os.path.isdir(d)]
-print(len(all_dirs))
-# Process each directory
-for count,dir_path in enumerate(all_dirs):
-    print(f"On {dir_path}")
-    print(f'{count+1}/{len(all_dirs)}')
+
+# MPI setup
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
+# Divide the directories among MPI processes
+dirs_per_process = len(all_dirs) // size
+start_index = rank * dirs_per_process
+end_index = (rank + 1) * dirs_per_process if rank != size - 1 else len(all_dirs)
+
+# Process assigned directories
+for count, dir_path in enumerate(all_dirs[start_index:end_index], start=start_index):
+    print(f"[Process {rank}] On {dir_path}")
+    print(f"[Process {rank}] {count + 1}/{len(all_dirs)}")
     args_file_path = os.path.join(dir_path, 'args')
 
     # Check if the args file exists in the directory

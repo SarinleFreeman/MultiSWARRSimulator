@@ -1,17 +1,23 @@
 import argparse
-import os
+from typing import List, Any
 
 from simple_chalk import chalk
-import numpy as np
+
+
+def namespace_to_dict(namespace: argparse.Namespace) -> dict:
+    return {
+        k: namespace_to_dict(v) if isinstance(v, argparse.Namespace) else v
+        for k, v in vars(namespace).items()
+        if v is not None
+    }
 
 
 class MultiCLI:
-    def __init__(self: 'MultiCLI', defs: dict) -> None:
-        self.defaults = defs
+    def __init__(self: 'MultiCLI', defaults: dict) -> None:
+        self.defaults = defaults
         self.args = None
 
-    def parse_user_inputs(self: 'MultiCLI') -> None:
-        parser = argparse.ArgumentParser(
+        self.parser = argparse.ArgumentParser(
             prog='main',
             description=print(chalk.blue.bold(
                 'Welcome to the Multi-Dimensional Spin Wave Simulator. The program has a corresponding manual located '
@@ -21,76 +27,41 @@ class MultiCLI:
             )),
         )
 
-        # Add arguments for each parameter
+    def parse_user_inputs(self: 'MultiCLI') -> None:
+
+        # Add default key arguments to parser
         for key in self.defaults.keys():
             key_shrt = "_".join([k[:2] for k in key.split('_')])
-            parser.add_argument(f'--{key}', f'-{key_shrt}', help=chalk.blue(
+            self.parser.add_argument(f'--{key}', f'-{key_shrt}', help=chalk.blue(
                 f"This parameter is used to specify the range and the number of points for the {key} variable in the "
-                "format min,max,num_points."),
-                                type=str,
-                                default=None)
+                "format min,max,num_points,rounding_factor."),
+                                     type=str,
+                                     default=None)
 
-        args = parser.parse_args()
+        args = self.parser.parse_args()
 
         # Parse the arguments
         for key in self.defaults.keys():
             arg_value = getattr(args, key)
             if arg_value:
+                # Split the argument into a list and check if it is in the correct format
                 arg_range = arg_value.split(',')
-                if len(arg_range) == 3:
+                if len(arg_range) == 4:
                     min_val = float(arg_range[0])
                     max_val = float(arg_range[1])
                     num_points = int(arg_range[2])
+                    rounding_factor = int(arg_range[3])
 
-                    setattr(args, key, {'min': min_val, 'max': max_val, 'num_points': num_points})
+                    setattr(args, key, {'min': min_val, 'max': max_val, 'num_points': num_points, 'rounding_factor': rounding_factor})
                 else:
-                    raise ValueError(f"Invalid format for --{key}. It should be in the format min,max,num_points")
+                    raise ValueError(f"Invalid format for --{key}. It should be in the format min,max,num_points,rounder")
 
         self.args = args
 
-    def get_parsed_inputs(self: 'MultiCLI') -> dict:
-        return {
-            k: getattr(self.args, k) if hasattr(self.args, k) else v
-            for k, v in self.defaults.items()
-        }
+    def get_parsed_inputs(self: 'MultiCLI') -> List[List[Any]]:
+        parsed_args = namespace_to_dict(self.args)
 
 
-# test code
-defaults = {'time_power': -9,
-            'time_base': 10,
-            'number_of_steps': 1,
-            'number_of_points': 1024,
-            'save_step': 1,
-            'shift_save': 0,
-            'theta_int': 10e-9,
-            'max_delay': 10,
-            'custom_start': None,
-            'input_antannae': 384,
-            'output_antannae': 640,
-            'applied_mag_field': 1732,
-            'gain_value': 1,
-            'amp_noise_floor': 1e-3,
-            'non_linear_damping_coefficient': 10 * 1e9,
-            'linear_damping_coefficient': 4.4 * 1e6,
-            'gyro_ratio': 2.8 * 1e6,
-            'sat_mag_d_with_4_pi': 1919,
-            'antennae_width': 50e-6,
-            'film_thickness': 5.7e-6,
-            'antennae_seperation': 8.2e-3,
-            's_wave_type': 'MSSW',
-            'short_term_memory': True,
-            'parity_check': True,
-            'plot': True,
-            'strip_end_len': 384,
-            'verbose': False,
-            'const_bin': True,
-            'fp_rounder': 15,
-            'sim_dir': os.path.join(os.getcwd(), 'simulation_data', 'mssw_gain_fm_theta')
-
-            }
-
-multi_cli = MultiCLI(defaults)
-multi_cli.parse_user_inputs()
-parsed_inputs = multi_cli.get_parsed_inputs()
-
-print(parsed_inputs['theta_int'])
+        # list comprehension of above
+        return [[dim[0], dim[1].get('min'), dim[1].get('max'), dim[1].get('num_points'),dim[1].get('rounding_factor')]
+                for dim in parsed_args.items() if dim[0] in self.defaults.keys()]
