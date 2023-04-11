@@ -1,10 +1,9 @@
 from itertools import product as it_product
 from copy import deepcopy
-from typing import List
+from typing import List, Any
 
 import numpy as np
 from numpy import linspace
-from traitlets import Any
 
 
 class ParamGenerator:

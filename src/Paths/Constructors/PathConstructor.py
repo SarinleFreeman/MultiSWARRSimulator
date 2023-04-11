@@ -27,7 +27,7 @@ class PathConstructor(ABC):
         """
         pass
 
-    def build_path(self, ignore_methods=["set_num_steps"]) -> Path:
+    def build_path(self, ignore_methods= []) -> Path:
         """
         Build the path.
         """
@@ -35,6 +35,7 @@ class PathConstructor(ABC):
         # Call all the set methods and ignore certain methods.
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             if name.startswith("set_") and name not in ignore_methods:
+                print(name)
                 method()
 
         path = Path(handlers=self.handlers)

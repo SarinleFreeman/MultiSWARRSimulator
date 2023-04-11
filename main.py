@@ -31,7 +31,7 @@ if mpi_comm.rank == 0:
                 'output_antannae': 640,
                 'applied_mag_field': 1732,
                 'gain_value': 1,
-                'amp_noise_floor': 1e-3,
+                'amp_noise_floor': 5e-4,
                 'non_linear_damping_coefficient': 10 * 1e9,
                 'linear_damping_coefficient': 4.4 * 1e6,
                 'gyro_ratio': 2.8 * 1e6,
