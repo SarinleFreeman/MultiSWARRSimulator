@@ -132,3 +132,4 @@ dmypy.json
 # ignore local misc
 local_misc/
 simulation_data/*
+.idea

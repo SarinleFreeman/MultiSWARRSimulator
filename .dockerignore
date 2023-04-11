@@ -25,7 +25,7 @@ dist/
 
 # Ignore output files
 output_test.log
-simulation_data/
+simulation_data/*
 
 # Ignore temporary files and directories created by the OS
 *.swp
