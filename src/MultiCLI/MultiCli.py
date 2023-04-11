@@ -31,8 +31,9 @@ class MultiCLI:
 
         # Add default key arguments to parser
         for key in self.defaults.keys():
-            key_shrt = "_".join([k[:2] for k in key.split('_')])
-            self.parser.add_argument(f'--{key}', f'-{key_shrt}', help=chalk.blue(
+            key_range = f"{key}_range"
+            key_shrt = "_".join([k[:2] for k in key_range.split('_')])
+            self.parser.add_argument(f'--{key_range}', f'-{key_shrt}', help=chalk.blue(
                 f"This parameter is used to specify the range and the number of points for the {key} variable in the "
                 "format min,max,num_points,rounding_factor."),
                                      type=str,
@@ -42,7 +43,8 @@ class MultiCLI:
 
         # Parse the arguments
         for key in self.defaults.keys():
-            arg_value = getattr(args, key)
+            key_range = f"{key}_range"
+            arg_value = getattr(args, key_range)
             if arg_value:
                 # Split the argument into a list and check if it is in the correct format
                 arg_range = arg_value.split(',')
@@ -52,16 +54,18 @@ class MultiCLI:
                     num_points = int(arg_range[2])
                     rounding_factor = int(arg_range[3])
 
-                    setattr(args, key, {'min': min_val, 'max': max_val, 'num_points': num_points, 'rounding_factor': rounding_factor})
+                    setattr(args, key_range, {'min': min_val, 'max': max_val, 'num_points': num_points,
+                                              'rounding_factor': rounding_factor})
                 else:
-                    raise ValueError(f"Invalid format for --{key}. It should be in the format min,max,num_points,rounder")
+                    raise ValueError(
+                        f"Invalid format for --{key_range}. It should be in the format min,max,num_points,rounder")
 
         self.args = args
 
     def get_parsed_inputs(self: 'MultiCLI') -> List[List[Any]]:
         parsed_args = namespace_to_dict(self.args)
 
+        # Reform the parsed arguments for use in the ParamGenerator.
 
-        # list comprehension of above
-        return [[dim[0], dim[1].get('min'), dim[1].get('max'), dim[1].get('num_points'),dim[1].get('rounding_factor')]
-                for dim in parsed_args.items() if dim[0] in self.defaults.keys()]
+        return [[dim[0], dim[1].get('min'), dim[1].get('max'), dim[1].get('num_points'), dim[1].get('rounding_factor')]
+                for dim in parsed_args.items() if dim[0].replace("_range", "") in self.defaults.keys()]

@@ -11,14 +11,14 @@ class PathConstructor(ABC):
     The path constructor class is used to construct a path.
     """
 
-    def __init__(self, default_args: dict, inst_name: str):
+    def __init__(self, default_args: dict, inst_name: str, handlers: List[AbstractHandler] = None):
         """
         :param default_args: The default arguments for the path.
         :param inst_name: The name of the instance.
         """
         self.args = default_args
         self.inst_name = inst_name
-        self.handlers = None
+        self.handlers = handlers
 
     @abstractmethod
     def set_dirs(self) -> None:
@@ -27,22 +27,14 @@ class PathConstructor(ABC):
         """
         pass
 
-    def set_handlers(self, handlers: List[AbstractHandler]) -> None:
-        """
-        Set the handlers for the path.
-        """
-        self.handlers = handlers
-
-    def build_path(self) -> Path:
+    def build_path(self, ignore_methods=["set_num_steps"]) -> Path:
         """
         Build the path.
         """
 
-        self.set_dirs()
-
-        # Call all methods that start with "set_"
+        # Call all the set methods and ignore certain methods.
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
-            if name.startswith("set_") and name != "set_dirs" and name != "set_handlers":
+            if name.startswith("set_") and name not in ignore_methods:
                 method()
 
         path = Path(handlers=self.handlers)

@@ -171,16 +171,9 @@ def get_latest_values(custom_start: Optional[str]) -> Tuple[np.ndarray, np.ndarr
     if custom_start is None:
         latest_k_values, latest_x_values, latest_time_value = None, None, 0
     else:
-        print('here')
-        print(custom_start)
         latest = load_latest(custom_start)
-        print(latest)
-        print(latest.shape)
         latest_k_values, latest_x_values, latest_time_value = latest[0], latest[1], latest[2]
 
-        print(latest_k_values)
-        print(latest_x_values)
-        print(latest_time_value)
     return latest_k_values, latest_x_values, latest_time_value
 
 def pre_calc_time(initial_time: float, time_step: float, number_of_steps: int, allocation_portion: int) -> List[float]:

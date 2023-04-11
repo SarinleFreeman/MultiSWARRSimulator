@@ -1,6 +1,8 @@
 import os
+from typing import List
 
 from src.Paths.Constructors.PathConstructor import PathConstructor
+from src.Utils.Handler.definition import AbstractHandler
 
 
 class DynamicPathConstructor(PathConstructor):
@@ -9,8 +11,9 @@ class DynamicPathConstructor(PathConstructor):
     after a base simulation. The base simulation is used to generate the initial conditions for the dynamic simulation.
     """
 
-    def __init__(self, default_args: dict, number_of_signals: int, base_dir: str, inst_name: str):
-        super().__init__(default_args, inst_name)
+    def __init__(self, default_args: dict, number_of_signals: int, base_dir: str, inst_name: str
+                 , handlers: List[AbstractHandler] = None):
+        super().__init__(default_args, inst_name, handlers)
         self.number_of_signals = number_of_signals
         self.base_dir = base_dir
 
@@ -21,16 +24,16 @@ class DynamicPathConstructor(PathConstructor):
         # Directories for simulation
         self.args['sim_dir'] = self.base_dir
         self.args['custom_start'] = os.path.join(self.base_dir, "base_simulation_data")
-        self.args['sim_vis_path'] = os.path.join(self.args['sim_dir'], f'dynamic_simulation_figure{self.inst_name}')
-        self.args['sim_path'] = os.path.join(self.args['sim_dir'], f'dynamic_simulation_data{self.inst_name}')
+        self.args['sim_vis_path'] = os.path.join(self.args['sim_dir'], f'dynamic_simulation_figure')
+        self.args['sim_path'] = os.path.join(self.args['sim_dir'], f'dynamic_simulation_data')
 
         # Directories for Capacities
         self.args['stm_reconstructed_data_path'] = os.path.join(self.base_dir,
-                                                                f'stm_reconstructed_data_path{self.inst_name}')
-        self.args['stm_corr_data_path'] = os.path.join(self.base_dir, f'stm_corr_data_path{self.inst_name}')
+                                                                f'stm_reconstructed_data_path')
+        self.args['stm_corr_data_path'] = os.path.join(self.base_dir, f'stm_corr_data_path')
         self.args['pc_reconstructed_data_path'] = os.path.join(self.base_dir,
-                                                               f'pc_reconstructed_data_path{self.inst_name}')
-        self.args['pc_corr_data_path'] = os.path.join(self.base_dir, f'pc_corr_data_path{self.inst_name}')
+                                                               f'pc_reconstructed_data_path')
+        self.args['pc_corr_data_path'] = os.path.join(self.base_dir, f'pc_corr_data_path')
 
     def set_num_steps(self):
         """
@@ -45,9 +48,3 @@ class DynamicPathConstructor(PathConstructor):
         Sets the constant binning to false
         """
         self.args['const_bin'] = False
-
-    def set_handlers(self, handlers):
-        """
-        Sets the handlers for the simulation
-        """
-        self.handlers = handlers

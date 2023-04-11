@@ -9,7 +9,7 @@ class DataParser:
         self.output_antannae = output_antannae
 
     def load_data(self):
-        self.output = asarray(loadall(self.directory))
+        self.output = asarray(loadall(self.directory),dtype=object)
     def get_k_amps(self):
         return asarray([element[0] for element in self.output])
 

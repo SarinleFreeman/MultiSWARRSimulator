@@ -12,7 +12,6 @@ class SimDirCreator(AbstractHandler):
         self.name = 'SimDirCreator'
 
     def handle(self, request: dict) -> None:
-
         if request.get('TYPE') == self.name:
             # create dir and store args
             create_dir(path=request.get('ARGS').get('sim_dir'))

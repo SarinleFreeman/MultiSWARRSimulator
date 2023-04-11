@@ -17,7 +17,7 @@ class CapacityCalculatorBuilder:
 
     def build_calculator(self, time_values: ndarray, output_amps: ndarray, bins: ndarray,
                          sampler: SignalSampler) -> CapacityCalculator:
-        print(self.calc_type)
+
 
         if self.calc_type == 'STM':
             return STMCapacityCalculator(time_values=time_values, theta_int=self.args.get('theta_int'),

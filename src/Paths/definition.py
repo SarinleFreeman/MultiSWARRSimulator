@@ -3,6 +3,7 @@ from typing import List
 
 
 from src.Utils.Handler.definition import AbstractHandler
+from src.Utils.prints import wprint
 
 
 class Path:
@@ -30,4 +31,4 @@ class Path:
             self.root_handler.handle(init_req)
         except Exception as e:
             # Log any errors that occur while processing the request
-            logging.info(f"An error occurred while processing the request: {e}")
+            wprint(f"An error occurred while processing the request: {e}")

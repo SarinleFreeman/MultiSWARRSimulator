@@ -9,18 +9,22 @@ from src.Utils.Handler.definition import AbstractHandler
 
 
 class CLIHandler(AbstractHandler):
-    def __init__(self, next_step=''):
+    def __init__(self, next_step='', ignore_parser=False):
         self.next_step = next_step
         self.new_request = None
         self.name = 'CLI'
+        self.ignore_parser = ignore_parser
 
     def handle(self, request: dict) -> None:
 
         if request.get('TYPE') == self.name:
             # parse user inputs
-            cli = CLI(defaults=request.get('ARGS'))
-            cli.parse_user_inputs()
-            new_args = cli.get_parsed_inputs()
+            if self.ignore_parser:
+                new_args = request.get('ARGS')
+            else:
+                cli = CLI(defaults=request.get('ARGS'))
+                cli.parse_user_inputs()
+                new_args = cli.get_parsed_inputs()
 
             # generate wave numbers
             dz = new_args.get('antennae_seperation') / (

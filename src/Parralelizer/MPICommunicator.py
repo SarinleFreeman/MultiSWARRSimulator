@@ -1,10 +1,7 @@
-import argparse
-from typing import Callable, Any, List
+from typing import Any, List
 
 from mpi4py import MPI
-from numpy import split, asarray, array_split
-
-from src.Parralelizer.ParamGenerator import ParamGenerator
+from numpy import asarray, array_split
 
 
 class MPICommunicator:
@@ -31,4 +28,3 @@ class MPICommunicator:
 
     def share_variable(self, variable: Any, rank=0) -> Any:
         return self.comm.bcast(variable, root=rank)
-

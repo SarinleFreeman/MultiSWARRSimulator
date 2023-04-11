@@ -5,34 +5,12 @@ from src.MultiCLI.MultiCli import MultiCLI
 from src.Parralelizer.MPICommunicator import MPICommunicator
 from src.Parralelizer.ParamGenerator import ParamGenerator
 from src.Parralelizer.Simulation import SimPathRunner
-from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
 from src.SingleInstance.Simulator.DirCreator.handler import SimDirCreator
 from src.SingleInstance.Simulator.Generator.handler import SimGenHandler
 from src.SingleInstance.Simulator.Launcher.handler import SimLauncherHandler
 from src.SingleInstance.User.CLI.handler import CLIHandler
 from src.SingleInstance.Visualizer.SimVisualizer.handler import SimVisHandler
-
-
-def run_simulations(splitted_set, dy_hlers: list = None, bs_hlers: list = None, num_signals: int = 500):
-    # set up handlers
-    if dy_hlers is None:
-        dy_hlers = [CLIHandler(next_step='SIM_GEN'),
-                    SimGenHandler(next_step='SIM_LAUNCH'),
-                    SimLauncherHandler(next_step='SIM_VIS'),
-                    SimVisHandler(next_step='STM_CALC'),
-                    STMCalcHandler(next_step=None)
-                    ]
-    if bs_hlers is None:
-        bs_hlers = [CLIHandler(next_step='SimDirCreator'),
-                    SimDirCreator(next_step='SIM_GEN'),
-                    SimGenHandler(next_step='SIM_LAUNCH'),
-                    SimLauncherHandler(next_step='SIM_VIS'),
-                    SimVisHandler(next_step=None)
-                    ]
-    # run simulations
-    sim = SimPathRunner(hp_space=splitted_set)
-    sim.run_sims(dy_hlers=dy_hlers, bs_hlers=bs_hlers, num_signals=num_signals)
-
+from src.Utils.prints import sprint, wprint
 
 # Setup Parallel Communications
 mpi_comm = MPICommunicator()
@@ -79,7 +57,7 @@ if mpi_comm.rank == 0:
 
     # Remove theta_int from parsed inputs
     for count, p_input in enumerate(dim_inputs):
-        if p_input[0] == 'theta_int':
+        if p_input[0] == 'theta_int_range':
             t_int_range = p_input
             dim_inputs.pop(count)
             break
@@ -88,7 +66,10 @@ if mpi_comm.rank == 0:
     try:
         t_int_range = np_round(linspace(t_int_range[1], t_int_range[2], t_int_range[3]), t_int_range[4])
     except NameError:
+        wprint("No theta_int range specified, using default")
         t_int_range = np_round(linspace(defaults['theta_int'], defaults['theta_int'], 1), 7)
+
+    sprint(f"Running simulations for theta_int: {t_int_range}")
 else:
     t_int_range = None
 
@@ -113,8 +94,32 @@ for t_int in t_int_range:
     mpi_comm.share_params(name='dynamic_params')
     mpi_comm.comm.Barrier()
 
-    # Run all nodes
-    print(
-        f"Running on node {mpi_comm.rank}, with params: {[splt_set['identifier'] for splt_set in mpi_comm.splt_pm['dynamic_params']]}"
+    # Simulation Setup
+
+    if len(mpi_comm.splt_pm['dynamic_params']) == 0:
+        sprint(f"Node {mpi_comm.rank} has no simulations to run, skipping...")
+    else:
+        sprint(
+            f"Running on node {mpi_comm.rank}, with params: {[splt_set['identifier'] for splt_set in mpi_comm.splt_pm['dynamic_params']]}"
         )
+        # Run simulation
+        sim = SimPathRunner(hp_space=mpi_comm.splt_pm['dynamic_params'])
+        dy_hlers = [CLIHandler(next_step='SIM_GEN', ignore_parser=True),
+                    SimGenHandler(next_step='SIM_LAUNCH'),
+                    SimLauncherHandler(next_step='SIM_VIS'),
+                    SimVisHandler(next_step='STM_CALC')
+                    ]
+        bs_hlers = [CLIHandler(next_step='SimDirCreator', ignore_parser=True),
+                    SimDirCreator(next_step='SIM_GEN'),
+                    SimGenHandler(next_step='SIM_LAUNCH'),
+                    SimLauncherHandler(next_step='SIM_VIS'),
+                    SimVisHandler(next_step=None)
+                    ]
+
+        sim.run_sims(dy_hlers=dy_hlers, bs_hlers=bs_hlers, num_signals=10)
+
+    # Wait for all nodes to finish before moving on to next theta_int
     mpi_comm.comm.Barrier()
+
+sprint(f"All actions complete on node {mpi_comm.rank}")
+mpi_comm.comm.Barrier()
