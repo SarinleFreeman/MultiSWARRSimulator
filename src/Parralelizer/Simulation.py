@@ -32,7 +32,6 @@ class SimPathRunner:
 
             # Build the base path.
             bs_p_b = BasePathConstructor(default_args=copy(args), inst_name=args['identifier'], handlers=bs_hlers)
-            bs_p_b.set_num_steps()
             bs_pth = bs_p_b.build_path()
 
             # Take the base path.

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pickle
 
+from matplotlib import pyplot as plt
 from numpy import random, zeros
 
 from src.SingleInstance.Simulator.Generator.Definition.Amplifier.definition import Amplifier
@@ -138,15 +139,30 @@ def initialize_s_waves(number_of_steps: int, allocation_portion: int, n_of_point
     return s_wave_amps_record_k, s_wave_amps_record_x
 
 
+"""
+def create_noisy_signal(n_of_points: int) -> np.ndarray:
+
+    return ((random.random(n_of_points) - 0.5) + (
+            random.random(n_of_points) - 0.5) * 1j) * 1e-12"""
+
+
 def create_noisy_signal(n_of_points: int) -> np.ndarray:
     """
-    Create a complex-valued noisy signal with length n_of_points
+    Create a complex-valued noisy signal with length n_of_points with only right moving k-vector waves
     :param n_of_points: length of the signal
     :return: complex-valued noisy signal
     """
-    return ((random.random(n_of_points) - 0.5) + (
-            random.random(n_of_points) - 0.5) * 1j) * 1e-12
+    # Create a random frequency-domain signal
+    freq_domain_signal = ((np.random.random(n_of_points // 2) - 0.5) + (
+            np.random.random(n_of_points // 2) - 0.5) * 1j) * 1e-12
 
+    # Append zeros for negative k-vectors
+    freq_domain_signal = np.concatenate([freq_domain_signal,np.zeros(n_of_points // 2)])
+
+    # Convert to time-domain signal
+    time_domain_signal = np.fft.ifft(freq_domain_signal)
+
+    return time_domain_signal
 
 
 def calculate_allocation_length(number_of_steps: int, allocation_portion: int) -> int:
@@ -176,6 +192,7 @@ def get_latest_values(custom_start: Optional[str]) -> Tuple[np.ndarray, np.ndarr
 
     return latest_k_values, latest_x_values, latest_time_value
 
+
 def pre_calc_time(initial_time: float, time_step: float, number_of_steps: int, allocation_portion: int) -> List[float]:
     """
     Pre-calculates the times at which the s wave amplitudes are stored
@@ -186,4 +203,3 @@ def pre_calc_time(initial_time: float, time_step: float, number_of_steps: int, a
     :return: List of times at which the s wave amplitudes are stored
     """
     return [initial_time + step * time_step for step in range(number_of_steps) if step % allocation_portion == 0]
-

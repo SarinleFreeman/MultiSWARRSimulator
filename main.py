@@ -5,6 +5,9 @@ from src.MultiCLI.MultiCli import MultiCLI
 from src.Parralelizer.MPICommunicator import MPICommunicator
 from src.Parralelizer.ParamGenerator import ParamGenerator
 from src.Parralelizer.Simulation import SimPathRunner
+from src.SingleInstance.Capacity.CapacityCalculations.STM.handler import STMCalcHandler
+from src.SingleInstance.Capacity.CapacityCalculations.PC.handler import PCCalcHandler
+
 from src.SingleInstance.Simulator.DirCreator.handler import SimDirCreator
 from src.SingleInstance.Simulator.Generator.handler import SimGenHandler
 from src.SingleInstance.Simulator.Launcher.handler import SimLauncherHandler
@@ -31,7 +34,7 @@ if mpi_comm.rank == 0:
                 'output_antannae': 640,
                 'applied_mag_field': 1732,
                 'gain_value': 1,
-                'amp_noise_floor': 5e-4,
+                'amp_noise_floor': 1e-5,
                 'non_linear_damping_coefficient': 10 * 1e9,
                 'linear_damping_coefficient': 4.4 * 1e6,
                 'gyro_ratio': 2.8 * 1e6,
@@ -44,7 +47,7 @@ if mpi_comm.rank == 0:
                 'parity_check': True,
                 'plot': True,
                 'strip_end_len': 384,
-                'verbose': False,
+                'verbose': True,
                 'const_bin': True,
                 'fp_rounder': 15,
                 'sim_dir': os.path.join(os.getcwd(), 'simulation_data', 'mssw_gain_fm_theta')
@@ -84,6 +87,11 @@ for t_int in t_int_range:
         # Generate Parameter Space for dynamic simulation variables
         defaults['theta_int'] = t_int
         pm_space = ParamGenerator(defaults=defaults)
+
+        # rename dimension inputs to match defaults
+        for count, p_input in enumerate(dim_inputs):
+            dim_inputs[count][0] = p_input[0].replace('_range', '')
+
         pm_space.add_dimensions(dim_inputs)
         pm_space.create_space()
 
@@ -107,7 +115,9 @@ for t_int in t_int_range:
         dy_hlers = [CLIHandler(next_step='SIM_GEN', ignore_parser=True),
                     SimGenHandler(next_step='SIM_LAUNCH'),
                     SimLauncherHandler(next_step='SIM_VIS'),
-                    SimVisHandler(next_step='STM_CALC')
+                    SimVisHandler(next_step='STM_CALC'),
+                    STMCalcHandler(next_step='PC_CALC'),
+                    PCCalcHandler(next_step=None)
                     ]
         bs_hlers = [CLIHandler(next_step='SimDirCreator', ignore_parser=True),
                     SimDirCreator(next_step='SIM_GEN'),
@@ -116,7 +126,7 @@ for t_int in t_int_range:
                     SimVisHandler(next_step=None)
                     ]
 
-        sim.run_sims(dy_hlers=dy_hlers, bs_hlers=bs_hlers, num_signals=10)
+        sim.run_sims(dy_hlers=dy_hlers, bs_hlers=bs_hlers, num_signals=500)
 
     # Wait for all nodes to finish before moving on to next theta_int
     mpi_comm.comm.Barrier()

@@ -9,8 +9,9 @@ class BinaryWave:
         self.stored_values = [init_val]
 
     def switch_bin_val(self):
-        num = random.randint(0,1)
-        self.current_val = self._binarize(num)
+        self.current_val = self.mapping[1]
+        #num = random.randint(0,1)
+        #self.current_val = self._binarize(num)
 
 
     def store_current(self):

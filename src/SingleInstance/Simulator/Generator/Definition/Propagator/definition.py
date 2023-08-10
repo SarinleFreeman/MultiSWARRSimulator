@@ -1,6 +1,8 @@
 import copy
 from typing import List
 
+import numpy as np
+from matplotlib import pyplot as plt
 from numpy import conjugate, mean, multiply
 from numpy.fft import fft, ifft
 
@@ -8,8 +10,6 @@ from src.SingleInstance.Simulator.Generator.Definition.Amplifier.definition impo
 
 
 # define function capable of calculating landau-ginzburg non-linear term
-
-
 class SpinWavePropagatorInterface:
     """
     The propagators job is to handle the propagation of spin waves over time. It uses various numerical differentiation
@@ -22,7 +22,7 @@ class SpinWavePropagatorInterface:
         self.s_wave_g_velocities = None
 
     def propagate(self, s_wave_k_space_amps, time_step, absolving_function, amplifier, gain_modulation, current_time,
-                  initial_time,output_antannae
+                  initial_time, output_antannae
 
                   ):
         pass
@@ -50,8 +50,16 @@ class SimpleRungeKutta(SpinWavePropagatorInterface):
         squared_portion = multiply(conjugate(s_wave_x_space_amps), s_wave_x_space_amps)
         nl_part = multiply(squared_portion, s_wave_x_space_amps)
 
-        abs_portion = multiply(s_wave_x_space_amps, absolving_function)
-        non_linear_term = non_linearity_comp * nl_part - abs_portion
+        # Calculate the absolute value of the signal
+        abs_signal = np.abs(s_wave_x_space_amps)
+
+        # Apply the absolving function to the absolute value of the signal
+        absolved_abs_signal = multiply(abs_signal, absolving_function)
+
+        # Multiply the result by the sign of the original signal to restore the sign
+        damped_signal = np.sign(s_wave_x_space_amps) * absolved_abs_signal
+
+        non_linear_term = non_linearity_comp * nl_part - damped_signal
 
         return fft(non_linear_term)
 
@@ -78,8 +86,8 @@ class SimpleRungeKutta(SpinWavePropagatorInterface):
 
         return -ang_comp - nl_term - l_damp_comp + feedback_signal
 
-    def propagate(self, s_wave_k_space_amps, time_step, absolving_function, amplifier:Amplifier, gain_modulation,
-                  current_time, initial_time,output_antannae
+    def propagate(self, s_wave_k_space_amps, time_step, absolving_function, amplifier: Amplifier, gain_modulation,
+                  current_time, initial_time, output_antannae
                   ):
         """
         Parameters
@@ -104,7 +112,7 @@ class SimpleRungeKutta(SpinWavePropagatorInterface):
         nl_term = self.l_ginz_non_linear_term(s_wave_input_amps=s_wave_x_space,
                                               absolving_function=absolving_function)
         # Calculate feedback signal
-        gain_signal =  amplifier.amplify(mean(s_wave_x_space[output_antannae:output_antannae+1])) * gain_modulation
+        gain_signal = amplifier.amplify(mean(s_wave_x_space[output_antannae:output_antannae + 1])) * gain_modulation
 
         self.s_wave.sw_delay_line.antannae.filter()
         feed_back_signal = gain_signal * (
@@ -128,6 +136,10 @@ class SimpleRungeKutta(SpinWavePropagatorInterface):
         k4_val = time_step * self.time_diff(k3_updated_amplitudes,
                                             nl_term, feed_back_signal)
 
+
+
+
         # total propagation
         output = copy_s_wave_k_space_amps + (1 / 6) * (k1_val + 2 * k2_val + 2 * k3_val + k4_val)
+
         return output

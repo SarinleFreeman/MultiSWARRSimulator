@@ -3,7 +3,8 @@ from array import array
 from numpy import pi, linspace, arctan, array, zeros, concatenate, ndarray
 
 from src.SingleInstance.Simulator.Generator.Definition.Amplifier.definition import Amplifier
-from src.SingleInstance.Simulator.Generator.Definition.Propagator.definition import SimpleRungeKutta, SpinWavePropagatorInterface
+from src.SingleInstance.Simulator.Generator.Definition.Propagator.definition import SimpleRungeKutta, \
+    SpinWavePropagatorInterface
 from src.SingleInstance.Simulator.Generator.Definition.SWDelayLine.Antannae.definition import AntennaeI, BesselAntennae
 from src.SingleInstance.Simulator.Generator.Definition.SWDelayLine.definition import SWDelayLine
 from src.SingleInstance.Simulator.Generator.Definition.Simulator.definition import Simulator
@@ -15,11 +16,12 @@ from src.SingleInstance.Simulator.Generator.Definition.WaveGenerator.waveGenerat
 
 
 class BuildSimulator:
-    def __init__(self, args):
+    def __init__(self, args, amp_ratio=2700):
+        self.amp_ratio = amp_ratio
         self.args = args
 
     def build_amplifier(self) -> Amplifier:
-        return Amplifier(gain=2700 * self.args.get('linear_damping_coefficient'),
+        return Amplifier(gain=self.amp_ratio * self.args.get('linear_damping_coefficient'),
                          noise_floor=self.args.get('amp_noise_floor'))
 
     def build_antannae(self) -> AntennaeI:
@@ -49,16 +51,14 @@ class BuildSimulator:
         return s_wave
 
     def build_propagator(self, swave: SpinWave) -> SpinWavePropagatorInterface:
-        # calculate the spatial resolution
-        # calculate the associated wave numbers to use in propagation.
-
+        # Build propagator with given parameters
         return SimpleRungeKutta(s_wave=swave, wave_numbers=self.args.get('wave_numbers'),
                                 applied_magnetic_field=self.args.get('applied_mag_field'))
 
     def build_absolving_loss(self) -> ndarray:
 
         lst = array([arctan(xxx) for xxx in linspace(-9, 9, self.args.get('strip_end_len') - 20)])
-        blocker = ((lst + arctan(9)) / pi) * -50 * 1e-2
+        blocker = ((lst + arctan(9)) / pi) * - 5e5
         return concatenate((blocker[::-1],
                             zeros(self.args.get('number_of_points') - 2 * (self.args.get('strip_end_len') - 20)),
                             blocker))

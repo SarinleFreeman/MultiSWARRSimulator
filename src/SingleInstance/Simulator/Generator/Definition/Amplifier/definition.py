@@ -1,5 +1,4 @@
-from numpy import random, array
-
+from numpy import random, array, pi, exp
 
 
 class Amplifier:
@@ -18,7 +17,9 @@ class Amplifier:
         :param value: numpy array representing the input signal
         :return: numpy array representing the amplified signal
         """
-        return self.gain * ( value  + self.noise_floor * (random.random(value.shape)))
+        phase = random.uniform(-pi, pi)  # generate a random phase between -pi and pi
+
+        return self.gain * exp(1j*phase)*(value + self.noise_floor * (random.random(value.shape)))
 
     def set_gain(self, gain: float) -> None:
         """

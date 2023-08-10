@@ -17,14 +17,18 @@ class SimVisHandler(AbstractHandler):
 
     def handle(self: 'SimVisHandler', request: dict) -> None:
         if request.get('TYPE') == self.name:
-            #build parser
+            # build parser
             args = request.get('ARGS')
-            #load data
-            data_parser = DataParser(args.get('sim_path'),args.get('output_antannae'))
+            # load data
+            data_parser = DataParser(args.get('sim_path'), args.get('output_antannae'))
             data_parser.load_data()
 
-            sim_vis = SimVisualizer(fig_dir=args.get('sim_vis_path'), data_parser=data_parser)
-            sim_vis.plot_output()
+            sim_vis = SimVisualizer(data_parser=data_parser, args=args)
+            sim_vis.plot_x()
+            sim_vis.plot_max_modes()
+            sim_vis.plot_phase()
+            sim_vis.plot_k_90()
+            sim_vis.plot_binary()
 
             # propagate request
             self.new_request = copy(request)

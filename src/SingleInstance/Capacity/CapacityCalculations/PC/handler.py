@@ -1,6 +1,8 @@
 import json
 from copy import copy
 
+import numpy as np
+
 from src.SingleInstance.Capacity.CapacityCalculations.Definition.CapacityCalculator.builder import CapacityCalculatorBuilder
 from src.SingleInstance.Capacity.CapacityCalculations.Definition.CapacityCalculator.definition import calculate_corr_coefs
 from src.SingleInstance.Capacity.CapacityCalculations.PC.definition import gen_y_pc
@@ -25,12 +27,17 @@ class PCCalcHandler(AbstractHandler):
             # split half the data into training and the other half into testing.
             splt_amps, av_splt_bins = pc_calc.split_data(rounder=request.get('ARGS').get('fp_rounder'))
 
-            half = len(splt_amps) // 2
-            x_test = splt_amps[:half]
-            y_test = av_splt_bins[:half]
+            # DECOUPLING
+            buffer = int(0.1 * len(av_splt_bins))  # define the size of the buffer
 
-            x_train = splt_amps[half: 2 * half]
-            y_train = av_splt_bins[half: 2 * half]
+            total_len = len(splt_amps)
+            half = (total_len - buffer) // 2
+
+            x_train = splt_amps[:half]
+            y_train = av_splt_bins[:half]
+
+            x_test = splt_amps[half + buffer: 2 * half + buffer]
+            y_test = av_splt_bins[half + buffer: 2 * half + buffer]
 
             # fit training data to calculator
             pc_calc.fit_data(x_train, y_train)
@@ -47,7 +54,6 @@ class PCCalcHandler(AbstractHandler):
             #predict and store data
             prediction = pc_calc.predict(x=x_test[request.get('ARGS').get('max_delay'):])
             actual = gen_y_pc(max_delay=request.get('ARGS').get('max_delay'), y=y_test)
-
 
 
 

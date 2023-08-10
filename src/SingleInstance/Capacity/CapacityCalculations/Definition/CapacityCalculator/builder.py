@@ -38,6 +38,7 @@ class CapacityCalculatorBuilder:
     def build(self):
         dparser = self.build_data_paraser()
         dparser.load_data()
+
         calc = self.build_calculator(time_values=dparser.get_times(), output_amps=dparser.get_output_x_amps(),
                                      bins=dparser.get_bin_vals(),
                                      sampler=self.build_sampler())

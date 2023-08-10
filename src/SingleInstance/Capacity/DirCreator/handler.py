@@ -10,11 +10,14 @@ class CPCDirCreator(AbstractHandler):
     def handle(self, request: dict) -> None:
 
         if request.get('TYPE') == "CPCDirCreator":
+
+
             # create dir
-            create_dir(path=request.get('TYPE').get('ARGS').get('capacity_dir'))
+            create_dir(path=request.get('ARGS').get('sim_dir'))
 
             # propagate request
             propagate_new_request = {'TYPE': self.next_step, 'ARGS': request.get('ARGS')}
+
             super().handle(propagate_new_request)
         else:
             return super().handle(request)

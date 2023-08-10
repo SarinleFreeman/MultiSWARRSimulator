@@ -5,6 +5,7 @@ from copy import copy
 
 
 def create_dir(path: str) -> None:
+
     if os.path.exists(path):
         print(f'Path {path} already exists, ignoring request')
     else:

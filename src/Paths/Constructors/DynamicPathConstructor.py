@@ -1,3 +1,4 @@
+import math
 import os
 from typing import List
 
@@ -40,8 +41,13 @@ class DynamicPathConstructor(PathConstructor):
         Sets the number of steps for the simulation
         """
         time_step = round(self.args['time_base'] ** (self.args['time_power']), self.args['fp_rounder'])
-        run_time = self.number_of_signals * self.args['theta_int']
-        self.args['number_of_steps'] = round(run_time / time_step)
+        run_time = round(self.number_of_signals * self.args['theta_int'],math.floor(-math.log10(abs(self.args['theta_int']))))
+        self.args['number_of_steps'] = 10
+
+        #self.args['number_of_steps'] = round(run_time / time_step)
+
+
+
 
     def set_const_bin(self):
         """

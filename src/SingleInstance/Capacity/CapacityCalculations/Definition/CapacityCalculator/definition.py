@@ -41,6 +41,7 @@ class CapacityCalculator(ABC):
         period_length = round(round(self.theta_int, rounder) / (
                 round(self.time_values[1], rounder) - round(self.time_values[0], rounder)))
 
+
         # get output amps
         self.sampler.fit(self.output_amps, self.time_values)
 

@@ -16,4 +16,5 @@ class BasePathConstructor(PathConstructor):
         self.args['sim_path'] = os.path.join(self.args['sim_dir'], 'base_simulation_data')
 
     def set_num_steps(self):
-        self.args['number_of_steps'] = round(5 * 1e10 * self.args['theta_int'])
+        self.args['number_of_steps'] = 10
+        #self.args['number_of_steps'] = round(5 * 1e10 * self.args['theta_int'])

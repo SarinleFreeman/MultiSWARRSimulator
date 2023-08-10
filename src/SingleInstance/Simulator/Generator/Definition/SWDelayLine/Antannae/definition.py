@@ -59,7 +59,7 @@ class BesselAntennae(AntennaeI):
 
         # Check if k is less than or equal to zero or if absolute_k is greater than max_k/ant_width
         absolute_k = abs(k)
-        if k <= 0 or absolute_k > (max_k / self.ant_width):
+        if k >= 0 or absolute_k > (max_k / self.ant_width):
             return 0
         else:
             # Calculate the filtered value using Bessel function and return it
